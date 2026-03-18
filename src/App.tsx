@@ -94,20 +94,20 @@ const TutorialInfoScreen = ({ onComplete }: { onComplete: () => void }) => {
   const steps = [
     {
       title: "基本操作",
-      desc: "表示される黄色のボタンをタップしてみましょう。",
-      action: "黄色ボタンをタップ",
-      icon: "⚡"
-    },
-    {
-      title: "真実の黄色",
-      desc: "最も純粋な黄色の丸をタップして確かめます。",
-      action: "黄色丸をタップ",
+      desc: "表示される黄色のボタンを体験し、3秒間保持すると次に進みます。",
+      action: "黄色のボタンを体験",
       icon: "🟡"
     },
     {
+      title: "本物を見抜く",
+      desc: "疑似問題をタップして、正しい黄色を選ぶ感覚を掴みます。",
+      action: "正しい黄色を選択",
+      icon: "🎯"
+    },
+    {
       title: "制限時間",
-      desc: "5分以内にできるだけ多くの黄色を集めましょう。",
-      action: "プレイ開始",
+      desc: "5分以内にできるだけ多くのポイントを獲得しましょう。",
+      action: "ゲームスタート",
       icon: "⏱"
     }
   ];
@@ -165,17 +165,20 @@ const TutorialInfoScreen = ({ onComplete }: { onComplete: () => void }) => {
 
 const WarningScreen = ({ onComplete }: { onComplete: () => void }) => (
   <motion.div
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    exit={{ opacity: 0 }}
+    initial={{ opacity: 0, scale: 0.9 }}
+    animate={{ opacity: 1, scale: 1 }}
+    exit={{ opacity: 0, scale: 0.9 }}
     className="flex flex-col items-center justify-center text-center p-4 space-y-8 w-full max-w-2xl mx-auto h-full"
   >
-    <div className="bg-white/10 backdrop-blur-md p-8 sm:p-12 rounded-[3rem] border-4 border-white/20 shadow-2xl w-full">
-      <AlertCircle className="w-16 h-16 sm:w-24 sm:h-24 text-white mx-auto mb-6 animate-pulse" />
-      <h3 className="text-2xl sm:text-4xl font-black text-white mb-6">⚠️ 警告 / WARNING ⚠️</h3>
-      <div className="space-y-6 text-white font-bold text-lg sm:text-2xl leading-relaxed">
-        <FormattedText text="このゲームは目が非常にダメージを負うので少しでも体に異変が起きた場合は直ちにゲームを終了してください。" />
-        <p className="text-sm sm:text-lg opacity-80 italic">開発者は死にかけていますが少しでも改善できるよう今も向き合っています。</p>
+    <div className="relative w-full overflow-hidden rounded-[3rem] border-4 border-yellow-400/50 bg-gradient-to-br from-amber-500/20 via-rose-600/20 to-violet-900/30 shadow-2xl">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.25),transparent_35%),radial-gradient(circle_at_80%_80%,rgba(255,255,0,0.15),transparent_30%)] animate-pulse" />
+      <div className="relative z-10 p-8 sm:p-12">
+        <AlertCircle className="w-18 h-18 sm:w-24 sm:h-24 text-red-200 mx-auto mb-4 animate-pulse" />
+        <h3 className="text-3xl sm:text-5xl font-black text-white mb-6">⚠️ 警告 / WARNING ⚠️</h3>
+        <div className="space-y-4 text-white font-bold text-base sm:text-xl leading-relaxed">
+          <FormattedText text="このゲームは目が非常にダメージを受ける可能性があります。体に異変があれば直ちに中断してください。" />
+          <p className="text-sm sm:text-lg opacity-90 italic">開発者は改善に取り組んでいます。ゆっくり深呼吸してから進んでください。</p>
+        </div>
       </div>
     </div>
     <LongPressButton onComplete={onComplete} text="理解して進む" />
@@ -199,9 +202,9 @@ const TransitionScreen = () => (
   </motion.div>
 );
 
-const ResultScreen = ({ isCorrect, reason, onComplete }: { isCorrect: boolean, reason?: string, onComplete: () => void }) => {
+const ResultScreen = ({ isCorrect, reason, points, onComplete }: { isCorrect: boolean, reason?: string, points: number, onComplete: () => void }) => {
   useEffect(() => {
-    const timer = setTimeout(onComplete, 5000);
+    const timer = setTimeout(onComplete, 3000);
     return () => clearTimeout(timer);
   }, [onComplete]);
 
@@ -234,11 +237,12 @@ const ResultScreen = ({ isCorrect, reason, onComplete }: { isCorrect: boolean, r
           {reason && <FormattedText text={reason} className="text-lg sm:text-2xl font-bold text-stone-400 max-w-md" />}
         </>
       )}
+      <div className="text-yellow-300 font-black text-base sm:text-2xl">この問題で獲得したポイント: {points}</div>
       <div className="w-48 h-2 bg-stone-800 rounded-full overflow-hidden">
         <motion.div 
           initial={{ width: "100%" }}
           animate={{ width: "0%" }}
-          transition={{ duration: 5, ease: "linear" }}
+          transition={{ duration: 3, ease: "linear" }}
           className="h-full bg-yellow-500"
         />
       </div>
@@ -399,7 +403,7 @@ const MasterLevel = ({ onAnswer }: { onAnswer: (isCorrect: boolean, score: numbe
         {options.map((color, i) => (
           <button
             key={i}
-            onClick={() => onAnswer(color === '#FFFF00', false, '達人識別', color, '#FFFF00')}
+            onClick={() => onAnswer(color === '#FFFF00', color === '#FFFF00' ? 1000 : 0, '達人識別', color, '#FFFF00')}
             className="w-6 h-6 sm:w-8 sm:h-8 rounded-sm hover:scale-125 transition-transform"
             style={{ backgroundColor: color }}
           />
@@ -477,38 +481,38 @@ const CustomCursor = ({ isMobile }: { isMobile: boolean }) => {
   );
 };
 
-const StartBackground = () => {
+const StartBackground = ({ isMobile }: { isMobile: boolean }) => {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {[...Array(30)].map((_, i) => (
-        <motion.div
-          key={i}
-          initial={{ 
-            x: Math.random() * 100 + "%", 
-            y: Math.random() * 100 + "%",
-            opacity: 0,
-            rotate: Math.random() * 360
-          }}
-          animate={{ 
-            y: [null, Math.random() * 100 + "%"],
-            opacity: [0, 0.6, 0],
-            scale: [0, Math.random() * 3 + 1, 0],
-            rotate: [null, Math.random() * 360]
-          }}
-          transition={{ 
-            duration: Math.random() * 5 + 5, 
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-          className="absolute"
-        >
-          {i % 2 === 0 ? (
-            <Sun className="w-8 h-8 text-yellow-400/30" />
-          ) : (
-            <Star className="w-6 h-6 text-yellow-300/30 fill-current" />
-          )}
-        </motion.div>
-      ))}
+      {isMobile ? (
+        [...Array(20)].map((_, i) => (
+          <motion.div
+            key={`star-${i}`}
+            initial={{ x: Math.random() * 100 + "%", y: -20, opacity: 0 }}
+            animate={{ x: Math.random() * 100 + "%", y: 120, opacity: [0, 0.8, 0] }}
+            transition={{ duration: 4 + Math.random() * 3, repeat: Infinity, ease: "linear", delay: -i * 0.2 }}
+            className="absolute"
+          >
+            <Star className="w-4 h-4 text-yellow-300/80" />
+          </motion.div>
+        ))
+      ) : (
+        [...Array(24)].map((_, i) => (
+          <motion.div
+            key={`shape-${i}`}
+            initial={{ x: Math.random() * 100 + "%", y: Math.random() * 100 + "%", opacity: 0 }}
+            animate={{ y: [null, Math.random() * 20 - 10 + "%"], x: [null, Math.random() * 20 - 10 + "%"], opacity: [0, 0.25, 0] }}
+            transition={{ duration: 6 + Math.random() * 6, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute"
+          >
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-[#5C3A14] border border-[#B88E4B]"
+              style={{ boxShadow: '0 0 20px rgba(250,204,21,0.2)' }}
+            >
+              <div className="w-full h-full bg-yellow-300 mix-blend-screen opacity-60" />
+            </div>
+          </motion.div>
+        ))
+      )}
     </div>
   );
 };
@@ -550,7 +554,7 @@ const Level7 = ({ onAnswer, difficulty }: any) => {
   );
 };
 
-const Level8 = ({ onAnswer, difficulty }: any) => {
+const Level8 = ({ onAnswer, difficulty, isDeveloperMode }: any) => {
   const words = useMemo(() => {
     const distractors = ["YELOW", "YELLOV", "YELL0W", "YELOWW", "YELLO", "YELOW"];
     const list = Array(12).fill("").map(() => distractors[Math.floor(Math.random() * distractors.length)]);
@@ -571,7 +575,7 @@ const Level8 = ({ onAnswer, difficulty }: any) => {
             whileHover={{ scale: 1.05, backgroundColor: "#292524" }}
             whileTap={{ scale: 0.95 }}
             onClick={() => onAnswer(w === "YELLOW", 0, '単語識別', w, 'YELLOW')}
-            className="bg-stone-800 text-yellow-500/80 p-3 rounded-xl font-mono text-sm font-black border border-stone-700"
+            className={`bg-stone-800 text-yellow-500/80 p-3 rounded-xl font-mono text-sm font-black border ${isDeveloperMode && w === 'YELLOW' ? 'border-red-500' : 'border-stone-700'}`}
           >
             {w}
           </motion.button>
@@ -580,7 +584,7 @@ const Level8 = ({ onAnswer, difficulty }: any) => {
     </div>
   );
 };
-const Level1 = ({ onAnswer, difficulty }: any) => {
+const Level1 = ({ onAnswer, difficulty, isDeveloperMode }: any) => {
   const options = useMemo(() => [
     '#FFFF00', // 正解
     '#FDFD96', // パステル
@@ -605,7 +609,7 @@ const Level1 = ({ onAnswer, difficulty }: any) => {
             whileHover={{ scale: 1.05, rotate: i % 2 === 0 ? 2 : -2 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => onAnswer(color === '#FFFF00', false, '4択識別', color, '#FFFF00')}
-            className="w-32 h-32 sm:w-48 sm:h-48 rounded-[2rem] sm:rounded-[3rem] shadow-2xl border-4 border-stone-800"
+            className={`w-32 h-32 sm:w-48 sm:h-48 rounded-[2rem] sm:rounded-[3rem] shadow-2xl border-4 ${isDeveloperMode && color === '#FFFF00' ? 'border-red-500' : 'border-stone-800'}`}
             style={{ backgroundColor: color }}
           />
         ))}
@@ -744,49 +748,76 @@ const Level3 = ({ onAnswer, difficulty }: any) => {
   );
 };
 
-const Level4 = ({ onAnswer, difficulty }: any) => {
-  const [pos, setPos] = useState({ x: 50, y: 50 });
-  const [count, setCount] = useState(0);
+const Level4 = ({ onAnswer, difficulty, isMobile }: any) => {
+  const [items, setItems] = useState<any[]>([]);
   const targetCount = 5 + difficulty;
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setPos({
-        x: Math.random() * 80 + 10,
-        y: Math.random() * 80 + 10
+    const spawn = setInterval(() => {
+      const fakeChance = Math.random() < 0.3;
+      setItems(prev => {
+        const next = [...prev, {
+          id: Date.now() + Math.random(),
+          x: Math.random() * 80 + 10,
+          y: -10,
+          isFake: fakeChance,
+          speed: (isMobile ? 1.6 : 0.8) + difficulty * 0.2
+        }];
+        return next.slice(-18);
       });
-    }, Math.max(400, 1000 - difficulty * 150));
-    return () => clearInterval(interval);
-  }, [difficulty]);
+    }, isMobile ? 300 : 350);
+    return () => clearInterval(spawn);
+  }, [difficulty, isMobile]);
 
-  const handleClick = () => {
+  useEffect(() => {
+    const move = setInterval(() => {
+      setItems(prev => prev.map(item => ({ ...item, y: item.y + item.speed })).filter(item => item.y < 115));
+    }, 30);
+    return () => clearInterval(move);
+  }, []);
+
+  const [count, setCount] = useState(0);
+
+  const handleItemClick = (item: any) => {
+    if (item.isFake) {
+      onAnswer(false, 0, '動体視力', '偽物に触れた', '本物の黄色');
+      return;
+    }
     setCount(c => {
       const next = c + 1;
       if (next >= targetCount) {
-        onAnswer(true, false, '動体視力', '捕獲完了', '捕獲完了');
+        onAnswer(true, 0, '動体視力', '捕獲完了', '本物の黄色');
       }
       return next;
     });
+    setItems(prev => prev.filter(i => i.id !== item.id));
   };
 
   return (
-    <div className="flex flex-col gap-2 sm:gap-4 w-full h-full max-h-[60vh]">
+    <div className="flex flex-col gap-2 w-full h-full max-h-[70vh]">
       <div className="flex justify-between items-center px-4">
         <DifficultyStars difficulty={difficulty} />
       </div>
       <div className="relative flex-1 bg-stone-900 rounded-[2rem] sm:rounded-[2.5rem] overflow-hidden border-4 border-stone-800 shadow-inner min-h-[300px]">
-        <div className="absolute top-4 left-4 text-stone-400 font-bold z-10 bg-stone-950/80 px-4 py-1 rounded-full text-xs sm:text-base">
+        <div className="absolute top-4 left-4 text-stone-400 font-bold z-10 bg-stone-950/80 px-3 py-1 rounded-full text-xs sm:text-base">
           逃げる黄色を捕まえろ: {count}/{targetCount}
         </div>
-        <motion.button
-          animate={{ top: `${pos.y}%`, left: `${pos.x}%` }}
-          transition={{ type: "spring", stiffness: 150, damping: 15 }}
-          onClick={handleClick}
-          className="absolute w-14 h-14 sm:w-20 sm:h-20 bg-yellow-500 rounded-full shadow-[0_0_30px_rgba(234,179,8,0.4)] flex items-center justify-center border-4 border-stone-100 cursor-pointer"
-          style={{ transform: 'translate(-50%, -50%)' }}
-        >
-          <Zap className="text-stone-950 w-6 h-6 sm:w-10 sm:h-10" />
-        </motion.button>
+        <AnimatePresence>
+          {items.map((item) => (
+            <motion.button
+              key={item.id}
+              initial={{ opacity: 0, scale: 0.6 }}
+              animate={{ top: `${item.y}%`, left: `${item.x}%`, opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              className={`absolute rounded-full border-2 ${item.isFake ? 'border-red-500 bg-amber-300' : 'border-yellow-200 bg-yellow-500'} shadow-lg`} 
+              style={{ transform: 'translate(-50%, -50%)', width: item.isFake ? 30 : 42, height: item.isFake ? 30 : 42, zIndex: item.isFake ? 30 : 20 }}
+              onClick={() => handleItemClick(item)}
+            >
+              {!item.isFake && <Sun className="w-4 h-4 text-white" />}
+            </motion.button>
+          ))}
+        </AnimatePresence>
       </div>
     </div>
   );
@@ -828,19 +859,32 @@ const FinalLevel = ({ onAnswer, difficulty }: any) => {
   );
 };
 
-const SpecialLevel = ({ onAnswer, difficulty }: any) => {
+const SpecialLevel = ({ onAnswer, difficulty, isDeveloperMode }: any) => {
+  const [isReal, setIsReal] = useState(Math.random() > 0.5);
+  const correctText = isReal ? '本物' : '偽物';
+
   return (
-    <div className="flex flex-col items-center gap-8 w-full py-12">
-      <div className="bg-yellow-500 text-stone-950 px-6 py-2 rounded-full font-black animate-bounce">SPECIAL BONUS</div>
-      <h2 className="text-4xl font-black text-yellow-500 text-center">この「黄色」は<br />ハッピーか？</h2>
-      <div className="flex gap-8">
+    <div className="flex flex-col items-center gap-6 w-full py-8 sm:py-12">
+      <div className="bg-yellow-500 text-stone-950 px-6 py-2 rounded-full font-black animate-pulse">SPECIAL</div>
+      <h2 className="text-3xl sm:text-5xl font-black text-yellow-500 text-center">この黄色は本物ですか？</h2>
+      <div className="w-48 h-48 rounded-full border-4 border-yellow-300 bg-yellow-200/80 flex items-center justify-center text-5xl font-black text-yellow-800 shadow-2xl">?</div>
+      <div className="text-stone-300 text-center max-w-md">この丸の中の黄色は{correctText}です。正しいものを選んでください。</div>
+      <div className="flex flex-wrap justify-center gap-4">
         <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={() => onAnswer(true, 5000, 'スペシャル', 'ハッピー', 'ハッピー')}
-          className="bg-yellow-500 text-stone-950 px-12 py-6 rounded-3xl font-black text-2xl shadow-[0_20px_40px_rgba(234,179,8,0.4)]"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => onAnswer(isReal, isReal ? 1000 : 0, 'スペシャル', '本物', (isReal ? '本物' : '偽物'))}
+          className={`px-8 py-3 rounded-full font-black text-lg ${isDeveloperMode && isReal ? 'border-4 border-red-500' : 'bg-yellow-500 text-stone-950'} transition-all`}
         >
-          ハッピー！
+          本物
+        </motion.button>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => onAnswer(!isReal, !isReal ? 1000 : 0, 'スペシャル', '偽物', (isReal ? '本物' : '偽物'))}
+          className={`px-8 py-3 rounded-full font-black text-lg ${isDeveloperMode && !isReal ? 'border-4 border-red-500' : 'bg-stone-800 text-yellow-300'} transition-all`}
+        >
+          偽物
         </motion.button>
       </div>
     </div>
@@ -933,7 +977,7 @@ const ReviewScreen = ({ history, onBack }: { history: any[], onBack: () => void 
   );
 };
 
-const AdminWindow = ({ onClose }: { onClose: () => void }) => {
+const AdminWindow = ({ onClose, onEnableDeveloperMode }: { onClose: () => void; onEnableDeveloperMode: () => void }) => {
   const [password, setPassword] = useState('');
   const [isAuth, setIsAuth] = useState(false);
   const [showProblems, setShowProblems] = useState(false);
@@ -941,6 +985,7 @@ const AdminWindow = ({ onClose }: { onClose: () => void }) => {
   const handleLogin = () => {
     if (password === 'fEDfeDJL3UJY') {
       setIsAuth(true);
+      onEnableDeveloperMode();
     } else {
       alert('パスワードが違います。');
     }
@@ -1035,6 +1080,34 @@ const VersionInfoWindow = ({ onClose }: { onClose: () => void }) => (
         <section className="space-y-6 bg-stone-900 p-8 rounded-[3rem] border-2 border-yellow-500/30">
           <div className="flex items-center gap-4">
             <div className="bg-yellow-500 text-stone-950 px-4 py-1 rounded-full font-black">NEW</div>
+            <h3 className="text-3xl font-black text-white">Ver 1.1.2</h3>
+          </div>
+          <div className="space-y-4">
+            <h4 className="text-xl font-black text-yellow-500 mb-3">〈修正内容〉</h4>
+            <ul className="text-lg text-stone-300 space-y-3 list-disc list-inside font-bold">
+              <li>スタート画面のボタンを押しやすく、押した時に押し込みアニメーションを追加しました。</li>
+              <li>スコア表示はゲーム開始後のみ表示されるように変更しました。</li>
+              <li>管理者モードログイン後、管理者ボタンに赤い枠を表示するようにしました。</li>
+              <li>警告画面にアニメーションと強調テキストを追加しました。</li>
+            </ul>
+          </div>
+        </section>
+
+        <section className="space-y-6 bg-stone-900 p-8 rounded-[3rem] border-2 border-yellow-500/30">
+          <div className="flex items-center gap-4">
+            <h3 className="text-3xl font-black text-white">Ver 1.1.1</h3>
+          </div>
+          <div className="space-y-4">
+            <h4 className="text-xl font-black text-yellow-500 mb-3">〈修正内容〉</h4>
+            <ul className="text-lg text-stone-300 space-y-3 list-disc list-inside font-bold">
+              <li>BGMが流れない問題を解消しました。</li>
+              <li>スタート画面のアニメーションとテキストを改善しました。</li>
+            </ul>
+          </div>
+        </section>
+
+        <section className="space-y-6 bg-stone-900 p-8 rounded-[3rem] border-2 border-yellow-500/30">
+          <div className="flex items-center gap-4">
             <h3 className="text-3xl font-black text-white">Ver 1.1.0</h3>
           </div>
           
@@ -1060,19 +1133,6 @@ const VersionInfoWindow = ({ onClose }: { onClose: () => void }) => (
                 <li>UIの表示安定化を継続しました。</li>
               </ul>
             </div>
-          </div>
-        </section>
-
-        <section className="space-y-6 bg-stone-900 p-8 rounded-[3rem] border-2 border-yellow-500/30">
-          <div className="flex items-center gap-4">
-            <div className="bg-yellow-500 text-stone-950 px-4 py-1 rounded-full font-black">NEW</div>
-            <h3 className="text-3xl font-black text-white">Ver 1.1.1</h3>
-          </div>
-          <div className="space-y-4">
-            <h4 className="text-xl font-black text-yellow-500 mb-3">〈修正内容〉</h4>
-            <ul className="text-lg text-stone-300 space-y-3 list-disc list-inside font-bold">
-              <li>BGMが流れない問題を解消しました。</li>
-            </ul>
           </div>
         </section>
 
@@ -1188,6 +1248,7 @@ export default function App() {
   const [history, setHistory] = useState<any[]>([]);
   const [isTutorial, setIsTutorial] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
+  const [isDeveloperMode, setIsDeveloperMode] = useState(false);
   const [showVersionInfo, setShowVersionInfo] = useState(false);
   const audioRef = React.useRef<HTMLAudioElement | null>(null);
 
@@ -1210,7 +1271,7 @@ export default function App() {
   }, [volume]);
 
   useEffect(() => {
-    const playingStates: GameState[] = ['WARNING', 'COUNTDOWN', 'LEVEL1', 'LEVEL2', 'LEVEL3', 'LEVEL4', 'LEVEL7', 'LEVEL8', 'LEVEL_GRADIENT', 'LEVEL_MEMORY', 'LEVEL_MIXING', 'LEVEL_SHADOW', 'SPECIAL', 'MASTER', 'FINAL'];
+    const playingStates: GameState[] = ['COUNTDOWN', 'LEVEL1', 'LEVEL2', 'LEVEL3', 'LEVEL4', 'LEVEL7', 'LEVEL8', 'LEVEL_GRADIENT', 'LEVEL_MEMORY', 'LEVEL_MIXING', 'LEVEL_SHADOW', 'SPECIAL', 'MASTER', 'FINAL'];
     if (playingStates.includes(gameState) && audioRef.current) {
       audioRef.current.play().catch(() => {
         // Autoplay blocked until user gesture
@@ -1323,18 +1384,22 @@ export default function App() {
   ) => {
     const timeSpent = (Date.now() - levelStartTime) / 1000;
     let pointsAwarded = 0;
-
     if (typeof customScore === 'number') {
       pointsAwarded = customScore;
     } else if (isCorrect) {
-      pointsAwarded = Math.max(100, 1000 - Math.floor(timeSpent * 30));
+      if (timeSpent <= 0.5) {
+        pointsAwarded = 1000;
+      } else {
+        pointsAwarded = Math.max(100, 1000 - Math.floor((timeSpent - 0.5) * 100));
+      }
     }
 
     let multiplier = difficulty;
     if (gameState === 'FINAL') multiplier *= 2;
-    if (gameState === 'SPECIAL') multiplier *= 20;
+    if (gameState === 'SPECIAL') multiplier *= 2;
+    if (gameState === 'MASTER') multiplier *= 5;
     
-    const finalPoints = pointsAwarded * multiplier;
+    const finalPoints = Math.max(0, Math.round(pointsAwarded * multiplier));
     if (finalPoints > 0) setScore(s => s + finalPoints);
 
     // Add to history
@@ -1349,18 +1414,18 @@ export default function App() {
     setHistory(prev => [...prev, newHistoryItem]);
 
     if (isCorrect || typeof customScore === 'number') {
-      setResult({ isCorrect: true });
+      setResult({ isCorrect: true, points: finalPoints });
       setGameState('RESULT');
     } else {
       if (gameState === 'MASTER') {
-        setResult({ isCorrect: false, reason: "たつじんならば、真実を見抜くまで終われない。" });
+        setResult({ isCorrect: false, points: finalPoints, reason: "たつじんならば、真実を見抜くまで終われない。" });
         setTimeout(() => {
           setGameState('MASTER');
           setResult(null);
           setLevelStartTime(Date.now());
         }, 2000);
       } else {
-        setResult({ isCorrect: false, reason: "真実の黄色は、もっと純粋なはずです。もっとハッピーなはずです。" });
+        setResult({ isCorrect: false, points: finalPoints, reason: "真実の黄色は、もっと純粋なはずです。もっとハッピーなはずです。" });
         setGameState('RESULT');
       }
     }
@@ -1380,8 +1445,7 @@ export default function App() {
         const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
         return () => clearTimeout(timer);
       } else {
-        const timer = setTimeout(() => pickNextLevel(), 1000);
-        return () => clearTimeout(timer);
+        pickNextLevel();
       }
     }
   }, [gameState, countdown, pickNextLevel]);
@@ -1446,6 +1510,10 @@ export default function App() {
     setTimeLeft(300);
     setMessage('');
     setLastLevel(null);
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
   };
 
   const formatTime = (seconds: number) => {
@@ -1465,33 +1533,44 @@ export default function App() {
           >
             <Sun className="text-yellow-500 w-6 h-6 sm:w-8 sm:h-8" />
           </motion.div>
-          <h1 className="text-sm sm:text-xl font-black tracking-tighter uppercase text-yellow-500">Yellow Happy Jam Jam</h1>
+          <div className="flex flex-col">
+            <h1 className="text-sm sm:text-xl font-black tracking-tighter uppercase text-yellow-500">Yellow Happy Jam Jam</h1>
+            {isDeveloperMode && <span className="text-xs text-red-400 font-black">開発者モード</span>}
+          </div>
         </div>
-        
-        <div className="flex items-center gap-4">
-          {!isMobile && (
-            <div className="flex items-center gap-2 bg-stone-900 px-4 py-1 rounded-full border border-stone-800">
-              {volume > 0 ? <Volume2 className="w-4 h-4 text-yellow-500" /> : <VolumeX className="w-4 h-4 text-stone-500" />}
-              <input 
-                type="range" min="0" max="100" value={volume} 
-                onChange={(e) => setVolume(Number(e.target.value))}
-                className="w-24 h-1 bg-stone-700 rounded-lg appearance-none cursor-pointer accent-yellow-500"
-              />
-            </div>
-          )}
 
-          <div className="flex items-center gap-2 sm:gap-4">
-            <div className="bg-stone-900 text-yellow-500 px-3 sm:px-5 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-sm font-black flex items-center gap-1 sm:gap-2 border border-stone-800 shadow-lg">
-              <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-current" />
-              SCORE: {score}
-            </div>
-            {gameState !== 'START' && gameState !== 'WARNING' && gameState !== 'COUNTDOWN' && gameState !== 'RESULT' && (
+        {gameState !== 'START' && !isMobile && (
+          <div className="flex items-center gap-2 bg-stone-900 px-4 py-1 rounded-full border border-stone-800">
+            {volume > 0 ? <Volume2 className="w-4 h-4 text-yellow-500" /> : <VolumeX className="w-4 h-4 text-stone-500" />}
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={volume}
+              onChange={(e) => setVolume(Number(e.target.value))}
+              className="w-24 h-1 bg-stone-700 rounded-lg appearance-none cursor-pointer accent-yellow-500"
+            />
+          </div>
+        )}
+
+        <div className="flex items-center gap-2 sm:gap-4">
+            {gameState !== 'START' && (
+              <div className="bg-stone-900 text-yellow-500 px-3 sm:px-5 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-sm font-black flex items-center gap-1 sm:gap-2 border border-stone-800 shadow-lg">
+                <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-current" />
+                SCORE: {score}
+              </div>
+            )}
+            {(gameState !== 'START' && gameState !== 'WARNING' && gameState !== 'COUNTDOWN' && gameState !== 'RESULT') && (
               <div className={`px-3 sm:px-5 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-sm font-black border-2 shadow-lg ${timeLeft < 60 ? 'border-red-500 text-red-500 animate-pulse' : 'border-stone-700 text-stone-400'}`}>
                 TIME: {formatTime(timeLeft)}
               </div>
             )}
+            {isDeveloperMode && (
+              <div className="bg-red-600 text-white px-2 py-1 rounded-full text-[10px] sm:text-xs font-black border border-red-400">
+                開発者モード
+              </div>
+            )}
           </div>
-        </div>
       </header>
 
       <main className="flex-1 overflow-hidden flex flex-col justify-center items-center p-4 sm:p-8 relative">
@@ -1505,7 +1584,7 @@ export default function App() {
               exit={{ opacity: 0, scale: 1.1 }}
               className="text-center space-y-4 sm:space-y-8 w-full max-w-4xl relative z-10 flex flex-col items-center justify-center h-full"
             >
-              <StartBackground />
+              <StartBackground isMobile={isMobile} />
               <div className="relative inline-block">
                 <motion.div
                   animate={{ 
@@ -1513,7 +1592,7 @@ export default function App() {
                     opacity: [0.1, 0.2, 0.1]
                   }}
                   transition={{ repeat: Infinity, duration: 5, ease: "linear" }}
-                  className="absolute -inset-10 sm:-inset-20 border-[10px] sm:border-[20px] border-yellow-500/10 rounded-full blur-2xl"
+                  className="absolute -inset-10 sm:-inset-20 border-[8px] sm:border-[14px] border-yellow-500/20 rounded-full blur-2xl"
                 />
                 <motion.h2 
                   animate={{ 
@@ -1532,9 +1611,9 @@ export default function App() {
 
               <div className="space-y-2 sm:space-y-4">
                 <motion.p 
-                  animate={{ opacity: [0.5, 1, 0.5] }}
+                  animate={{ opacity: [0.6, 1, 0.6] }}
                   transition={{ repeat: Infinity, duration: 4 }}
-                  className="text-xs sm:text-xl font-bold text-[#78350F] px-4 tracking-[0.1em] sm:tracking-[0.2em]"
+                  className="text-xs sm:text-xl font-black text-yellow-300 px-4 tracking-[0.1em] sm:tracking-[0.2em]"
                 >
                   黄色のことしか頭にない、選ばれし者のための聖域
                 </motion.p>
@@ -1542,10 +1621,13 @@ export default function App() {
 
               <div className="flex flex-col items-center gap-4 sm:gap-8 pt-4">
                 <motion.button
+                  initial={{ y: -80, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.6, ease: 'easeOut' }}
                   whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileTap={{ scale: 0.92 }}
                   onClick={() => setGameState('TUTORIAL')}
-                  className="group relative inline-flex items-center justify-center px-8 sm:px-24 py-4 sm:py-12 font-black text-xl sm:text-4xl transition-all duration-200 rounded-full focus:outline-none bg-yellow-500 text-stone-950 border-b-[4px] sm:border-b-[12px] border-yellow-700 hover:border-b-[2px] sm:hover:border-b-[8px] hover:translate-y-[2px] sm:hover:translate-y-[4px] active:border-b-0 active:translate-y-[4px] sm:active:translate-y-[12px] shadow-[0_15px_30px_rgba(234,179,8,0.3)]"
+                  className="group relative inline-flex items-center justify-center px-6 sm:px-20 py-4 sm:py-5 font-black text-lg sm:text-4xl transition-all duration-200 rounded-full focus:outline-none bg-yellow-500 text-stone-950 border-2 border-yellow-700 hover:border-yellow-300 hover:bg-yellow-400 active:scale-95 shadow-[0_15px_40px_rgba(234,179,8,0.4)]"
                 >
                   黄色の世界へ
                 </motion.button>
@@ -1570,20 +1652,20 @@ export default function App() {
                 )}
               </div>
 
-              <div className="absolute bottom-0 left-0 right-0 flex justify-between items-end px-4 pb-4">
-                <div className="text-stone-600 text-[8px] sm:text-xs font-black tracking-widest">
-                  Ver 1.1.1
+              <div className="absolute bottom-0 left-0 right-0 flex flex-col sm:flex-row justify-between items-center gap-2 px-4 pb-4">
+                <div className="text-yellow-300 text-xs sm:text-sm font-black tracking-widest bg-black/30 px-3 py-1 rounded-full border border-yellow-500/40">
+                  Ver 1.1.2
                 </div>
-                <div className="flex gap-4">
-                  <button 
+                <div className="flex flex-wrap gap-2 justify-center">
+                  <button
                     onClick={() => setShowVersionInfo(true)}
-                    className="text-stone-600 hover:text-yellow-500 transition-colors text-[8px] sm:text-xs font-black"
+                    className="bg-yellow-500 text-stone-950 px-3 py-1 rounded-full font-black text-[10px] sm:text-xs border-2 border-yellow-400 hover:bg-yellow-400 transition-all"
                   >
                     更新履歴
                   </button>
-                  <button 
+                  <button
                     onClick={() => setShowAdmin(true)}
-                    className="text-stone-600 hover:text-yellow-500 transition-colors text-[8px] sm:text-xs font-black"
+                    className={`${isDeveloperMode ? 'ring-2 ring-red-500 bg-red-700 text-white border-red-400' : 'bg-yellow-500 text-stone-950'} px-3 py-1 rounded-full font-black text-[10px] sm:text-xs border-2 border-yellow-400 hover:bg-yellow-400 transition-all`}
                   >
                     管理者用
                   </button>
@@ -1622,10 +1704,11 @@ export default function App() {
           {gameState === 'WARNING' && <WarningScreen onComplete={() => setGameState('COUNTDOWN')} />}
           {gameState === 'COUNTDOWN' && <CountdownScreen count={countdown} />}
           {gameState === 'TRANSITION' && <TransitionScreen />}
-          {gameState === 'RESULT' && result && (
+                  {gameState === 'RESULT' && result && (
             <ResultScreen 
               isCorrect={result.isCorrect} 
               reason={result.reason} 
+              points={result.points ?? 0}
               onComplete={pickNextLevel} 
             />
           )}
@@ -1647,18 +1730,18 @@ export default function App() {
                 <p className="text-yellow-500 font-black text-sm sm:text-xl tracking-tight">{message}</p>
               </div>
 
-              {gameState === 'LEVEL1' && <Level1 onAnswer={handleAnswer} difficulty={difficulty} />}
+              {gameState === 'LEVEL1' && <Level1 onAnswer={handleAnswer} difficulty={difficulty} isDeveloperMode={isDeveloperMode} />}
               {gameState === 'LEVEL2' && <Level2 onAnswer={handleAnswer} difficulty={difficulty} />}
               {gameState === 'LEVEL3' && <Level3 onAnswer={handleAnswer} difficulty={difficulty} />}
-              {gameState === 'LEVEL4' && <Level4 onAnswer={handleAnswer} difficulty={difficulty} />}
+              {gameState === 'LEVEL4' && <Level4 onAnswer={handleAnswer} difficulty={difficulty} isMobile={isMobile} />}
               {gameState === 'LEVEL7' && <Level7 onAnswer={handleAnswer} difficulty={difficulty} />}
-              {gameState === 'LEVEL8' && <Level8 onAnswer={handleAnswer} difficulty={difficulty} />}
+              {gameState === 'LEVEL8' && <Level8 onAnswer={handleAnswer} difficulty={difficulty} isDeveloperMode={isDeveloperMode} />}
               {gameState === 'LEVEL_GRADIENT' && <Level_Gradient onAnswer={handleAnswer} difficulty={difficulty} />}
               {gameState === 'LEVEL_MEMORY' && <Level_Memory onAnswer={handleAnswer} difficulty={difficulty} />}
               {gameState === 'LEVEL_MIXING' && <Level_Mixing onAnswer={handleAnswer} difficulty={difficulty} />}
               {gameState === 'LEVEL_SHADOW' && <Level_Shadow onAnswer={handleAnswer} difficulty={difficulty} />}
               {gameState === 'FINAL' && <FinalLevel onAnswer={handleAnswer} difficulty={difficulty} />}
-              {gameState === 'SPECIAL' && <SpecialLevel onAnswer={handleAnswer} difficulty={difficulty} />}
+              {gameState === 'SPECIAL' && <SpecialLevel onAnswer={handleAnswer} difficulty={difficulty} isDeveloperMode={isDeveloperMode} />}
               {gameState === 'MASTER' && <MasterLevel onAnswer={handleAnswer} />}
             </motion.div>
           )}
@@ -1702,7 +1785,7 @@ export default function App() {
         </AnimatePresence>
       </main>
 
-      {showAdmin && <AdminWindow onClose={() => setShowAdmin(false)} />}
+      {showAdmin && <AdminWindow onClose={() => setShowAdmin(false)} onEnableDeveloperMode={() => setIsDeveloperMode(true)} />}
       {showVersionInfo && <VersionInfoWindow onClose={() => setShowVersionInfo(false)} />}
 
       {/* Footer */}

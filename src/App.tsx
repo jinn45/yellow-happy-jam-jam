@@ -10,7 +10,7 @@ import { Sun, Star, Trophy, AlertCircle, RefreshCcw, Heart, Zap, Volume2, Volume
 // --- Types ---
 type GameState = 'START' | 'TUTORIAL' | 'TUTORIAL_INFO' | 'WARNING' | 'COUNTDOWN' | 'LEVEL1' | 'LEVEL2' | 'LEVEL3' | 'LEVEL4' | 'LEVEL7' | 'LEVEL8' | 'LEVEL_GRADIENT' | 'LEVEL_MEMORY' | 'LEVEL_MIXING' | 'LEVEL_SHADOW' | 'FINAL' | 'SPECIAL' | 'MASTER' | 'GAMEOVER' | 'CLEAR' | 'TIMEUP' | 'TRANSITION' | 'RESULT' | 'REVIEW';
 
-const TRUE_YELLOW = '#FFFF00';
+const TRUE_YELLOW = '#ffd900';
 
 const DIFFICULTY_LABELS: Record<number, string> = {
   1: '★かんたん',
@@ -1035,6 +1035,37 @@ const VersionInfoWindow = ({ onClose }: { onClose: () => void }) => (
         <section className="space-y-6 bg-stone-900 p-8 rounded-[3rem] border-2 border-yellow-500/30">
           <div className="flex items-center gap-4">
             <div className="bg-yellow-500 text-stone-950 px-4 py-1 rounded-full font-black">NEW</div>
+            <h3 className="text-3xl font-black text-white">Ver 1.1.0</h3>
+          </div>
+          
+          <div className="space-y-6">
+            <div>
+              <h4 className="text-xl font-black text-yellow-500 mb-3">〈システムの追加内容〉</h4>
+              <ul className="text-lg text-stone-300 space-y-3 list-disc list-inside font-bold">
+                <li>「真実の黄色」を #ffd900 に統一しました。</li>
+                <li>BGMを追加しました。</li>
+                <li>公開方法を変更しました。<span className="text-red-400 font-black">公開方法を変更</span></li>
+                <li>スタート画面のバージョン表示を 1.1.0 に更新しました。</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-xl font-black text-yellow-500 mb-3">〈ゲーム内容の変更について〉</h4>
+              <ul className="text-lg text-stone-300 space-y-3 list-disc list-inside font-bold">
+                <li>正解/不正解時のポイント表示をより明確にしました。</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-xl font-black text-yellow-500 mb-3">〈その他〉</h4>
+              <ul className="text-lg text-stone-300 space-y-3 list-disc list-inside font-bold">
+                <li>UIの表示安定化を継続しました。</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section className="space-y-6 bg-stone-900 p-8 rounded-[3rem] border-2 border-yellow-500/30">
+          <div className="flex items-center gap-4">
+            <div className="bg-yellow-500 text-stone-950 px-4 py-1 rounded-full font-black">NEW</div>
             <h3 className="text-3xl font-black text-white">Ver 1.0.3</h3>
           </div>
           
@@ -1166,9 +1197,10 @@ export default function App() {
   }, [volume]);
 
   useEffect(() => {
-    if (gameState !== 'START' && audioRef.current) {
+    const playingStates: GameState[] = ['WARNING', 'COUNTDOWN', 'LEVEL1', 'LEVEL2', 'LEVEL3', 'LEVEL4', 'LEVEL7', 'LEVEL8', 'LEVEL_GRADIENT', 'LEVEL_MEMORY', 'LEVEL_MIXING', 'LEVEL_SHADOW', 'SPECIAL', 'MASTER', 'FINAL'];
+    if (playingStates.includes(gameState) && audioRef.current) {
       audioRef.current.play().catch(() => {
-        // Autoplay blocked
+        // Autoplay blocked until user gesture
       });
     }
   }, [gameState]);
@@ -1386,7 +1418,12 @@ export default function App() {
 
     if (audioRef.current) {
       audioRef.current.volume = volume / 100;
-      audioRef.current.play().catch(() => {});
+      audioRef.current.muted = false;
+      audioRef.current.loop = true;
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch(() => {
+        // Autoplay may be blocked until user gesture.
+      });
     }
   };
 
@@ -1406,12 +1443,6 @@ export default function App() {
 
   return (
     <div className={`h-screen font-sans transition-colors duration-500 ${gameState === 'WARNING' ? 'bg-emerald-900' : 'bg-stone-950'} text-stone-100 overflow-hidden flex flex-col select-none ${gameState === 'START' || isMobile ? '' : 'cursor-none'}`}>
-      <audio 
-        ref={audioRef} 
-        loop 
-        src="https://assets.mixkit.co/music/preview/mixkit-happy-clappy-4.mp3"
-      />
-
       {/* Header */}
       <header className="p-3 sm:p-6 flex justify-between items-center border-b border-stone-800 bg-stone-950/80 backdrop-blur-md shrink-0 z-50">
         <div className="flex items-center gap-2 sm:gap-3">
@@ -1528,7 +1559,7 @@ export default function App() {
 
               <div className="absolute bottom-0 left-0 right-0 flex justify-between items-end px-4 pb-4">
                 <div className="text-stone-600 text-[8px] sm:text-xs font-black tracking-widest">
-                  Ver 1.0.3
+                  Ver 1.1.0
                 </div>
                 <div className="flex gap-4">
                   <button 
@@ -1667,8 +1698,9 @@ export default function App() {
       </footer>
       <audio 
         ref={audioRef}
-        src="https://assets.mixkit.co/music/preview/mixkit-game-show-fun-funny-music-68.mp3" 
+        src="/bgm.mp3"
         loop 
+        preload="auto"
       />
     </div>
   );

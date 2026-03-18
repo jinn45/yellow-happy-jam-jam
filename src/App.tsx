@@ -1035,7 +1035,7 @@ const VersionInfoWindow = ({ onClose }: { onClose: () => void }) => (
         <section className="space-y-6 bg-stone-900 p-8 rounded-[3rem] border-2 border-yellow-500/30">
           <div className="flex items-center gap-4">
             <div className="bg-yellow-500 text-stone-950 px-4 py-1 rounded-full font-black">NEW</div>
-            <h3 className="text-3xl font-black text-white">Ver 1.1.1</h3>
+            <h3 className="text-3xl font-black text-white">Ver 1.1.0</h3>
           </div>
           
           <div className="space-y-6">
@@ -1045,7 +1045,7 @@ const VersionInfoWindow = ({ onClose }: { onClose: () => void }) => (
                 <li>「真実の黄色」を #ffd900 に統一しました。</li>
                 <li>BGMを追加しました。</li>
                 <li>公開方法を変更しました。<span className="text-red-400 font-black">公開方法を変更</span></li>
-                <li>スタート画面のバージョン表示を 1.1.1 に更新しました。</li>
+                <li>スタート画面のバージョン表示を 1.1.0 に更新しました。</li>
               </ul>
             </div>
             <div>
@@ -1060,6 +1060,19 @@ const VersionInfoWindow = ({ onClose }: { onClose: () => void }) => (
                 <li>UIの表示安定化を継続しました。</li>
               </ul>
             </div>
+          </div>
+        </section>
+
+        <section className="space-y-6 bg-stone-900 p-8 rounded-[3rem] border-2 border-yellow-500/30">
+          <div className="flex items-center gap-4">
+            <div className="bg-yellow-500 text-stone-950 px-4 py-1 rounded-full font-black">NEW</div>
+            <h3 className="text-3xl font-black text-white">Ver 1.1.1</h3>
+          </div>
+          <div className="space-y-4">
+            <h4 className="text-xl font-black text-yellow-500 mb-3">〈修正内容〉</h4>
+            <ul className="text-lg text-stone-300 space-y-3 list-disc list-inside font-bold">
+              <li>BGMが流れない問題を解消しました。</li>
+            </ul>
           </div>
         </section>
 
